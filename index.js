@@ -8,24 +8,24 @@ var cors = require('cors');
 const key = process.env["GOODREADS_KEY"];
 const dbUser = process.env["DB_USER"];
 const dbPassword = process.env["DB_PASSWORD"];
+const dbAddress = process.env["DB_ID"];
 var port = process.env.PORT || 3000;
 var bodyParser = require('body-parser');
 require('body-parser-xml')(bodyParser);
 var mongo = require('mongodb');
 var MongoClient = mongo.MongoClient;
 
-var url = 'mongodb://' + dbUser + ':' + dbPassword + '@ds155934.mlab.com:55934/bookshelf-db';
+var url = 'mongodb://' + dbUser + ':' + dbPassword + dbAddress + ':55934/bookshelf-db';
 
 app.use(cors());
 app.use(bodyParser.xml({ limit: '2mb' }));
 
 app.post('/', function (req, res) {
-    console.log(req.body);
     let bodyString = req.body.toString().replace('$', 'dlr');
 
     MongoClient.connect(url, function (err, db) {
         if (err) {
-            console.log('Unable to connect to the mongoDB server. Error:', err);
+            console.error('Unable to connect to the mongoDB server. Error:', err);
         } else {
             console.log('Connection established to', url);
             let collection = db.collection('read');
@@ -35,7 +35,7 @@ app.post('/', function (req, res) {
                     "data": JSON.stringify(req.body)
                 });
             } catch (e) {
-                console.log("Caught error:", e);
+                console.error("Caught error:", e);
             }
             db.close();
         }
@@ -63,11 +63,11 @@ app.get('/api', function (req, res) {
                         res.send(result);
                     })
                     .catch((err) => {
-                        console.log('error:', err);
+                        console.error('error:', err);
                         res.send(err);
                     })
             } catch (e) {
-                console.log(e);
+                console.error(e);
                 res.send(err);
             }
             db.close();
